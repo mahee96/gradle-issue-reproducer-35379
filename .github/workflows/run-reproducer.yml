@@ -10,9 +10,8 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
+        distribution: 'corretto'
         java-version: 17
-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
@@ -21,5 +20,20 @@ jobs:
         build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
         build-scan-terms-of-use-agree: "yes"
 
-    - name: Run build # change the command below to whatever you need to reproduce the issue
-      run: gradle help --info
+    - name: Run build to trigger reproducer for 35379 (non-Windows)
+      if: runner.os != 'Windows'
+      run: |
+        pwd
+        ls -la
+        cd ./linked-project
+        chmod +x ./gradlew 
+        ./gradlew assemble
+
+    - name: Run build to trigger reproducer for 35379 (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        pwd
+        dir /A /L
+        cd linked-project
+        gradlew.bat assemble

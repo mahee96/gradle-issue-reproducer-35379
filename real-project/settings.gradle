@@ -1,0 +1,47 @@
+import java.nio.file.LinkOption
+import java.nio.file.Path
+import java.nio.file.Paths
+
+println "<======== In settings.gradle ========>"
+
+//def url = this.class.classLoader.getResource("settings.gradle")
+//println "Resource: $url"
+
+public static String getActualCwd() {
+    try {
+        String os = System.getProperty("os.name").toLowerCase();
+        Process process;
+
+        if (os.contains("win")) {
+            process = Runtime.getRuntime().exec("cmd /c cd");
+        } else {
+            process = Runtime.getRuntime().exec("pwd");
+        }
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream())
+        );
+        String cwd = reader.readLine();
+        process.waitFor();
+        return cwd;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+
+String pwdFromProcess = file(getActualCwd()).name
+
+String pwd = System.getenv("PWD")
+Path cwd = Paths.get(pwd ?: "")
+Path realCwd = cwd.toRealPath(LinkOption.NOFOLLOW_LINKS)
+
+println "cwd(user.dir)       : " + file(System.getProperty("user.dir")).name
+println "cwd(NOFOLLOW_LINKS) : " + realCwd.fileName
+println "pwd-from-process    : " + pwdFromProcess
+println "rootProject.name    : " + rootProject.name
+
+
+//rootProject.name = realCwd.fileName
+rootProject.name = pwdFromProcess
+
